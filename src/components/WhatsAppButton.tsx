@@ -1,9 +1,12 @@
 import { motion } from "framer-motion";
 
+const WHATSAPP_ORDER_MESSAGE = "Hola! Me encantaría hacerte un pedido.";
+const WHATSAPP_HREF = `https://wa.me/34663110412?text=${encodeURIComponent(WHATSAPP_ORDER_MESSAGE)}`;
+
 const WhatsAppButton = () => {
   return (
     <motion.a
-      href="https://wa.me/34663110412"
+      href={WHATSAPP_HREF}
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"

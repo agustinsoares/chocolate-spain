@@ -1,6 +1,9 @@
 import { motion } from "framer-motion";
 import heroCake from "@/assets/hero-cake.jpg";
 
+const WHATSAPP_ORDER_MESSAGE = "Hola! Me encantaría hacerte un pedido.";
+const WHATSAPP_HREF = `https://wa.me/34663110412?text=${encodeURIComponent(WHATSAPP_ORDER_MESSAGE)}`;
+
 const HeroSection = () => {
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-cream-light">
@@ -22,7 +25,7 @@ const HeroSection = () => {
             Postres artesanales elaborados con los mejores ingredientes, horneados al momento para cada pedido en el corazón de Valencia.
           </p>
           <a
-            href="https://wa.me/34663110412"
+            href={WHATSAPP_HREF}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-lg font-sans font-medium text-sm uppercase tracking-wider hover:opacity-90 transition-opacity"

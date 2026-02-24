@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const WHATSAPP_ORDER_MESSAGE = "Hola! Me encantaría hacerte un pedido.";
+const WHATSAPP_HREF = `https://wa.me/34663110412?text=${encodeURIComponent(WHATSAPP_ORDER_MESSAGE)}`;
+
 const Navbar = () => {
   const [open, setOpen] = useState(false);
 
@@ -20,7 +23,7 @@ const Navbar = () => {
             Nosotros
           </a>
           <a
-            href="https://wa.me/34663110412"
+            href={WHATSAPP_HREF}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm font-sans bg-primary text-primary-foreground px-5 py-2 rounded-lg hover:opacity-90 transition-opacity"
@@ -62,7 +65,7 @@ const Navbar = () => {
                 Nosotros
               </a>
               <a
-                href="https://wa.me/34663110412"
+                href={WHATSAPP_HREF}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-sans bg-primary text-primary-foreground px-5 py-2 rounded-lg text-center"
