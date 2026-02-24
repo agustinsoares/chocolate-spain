@@ -15,11 +15,11 @@ const HeroSection = () => {
             Valencia, España
           </p>
           <h1 className="text-5xl md:text-7xl font-serif font-medium leading-tight text-foreground mb-6">
-            Artisan pastry<br />
-            <span className="italic text-accent">made with love</span>
+            Pastelería artesanal<br />
+            <span className="italic text-accent">hecha con amor</span>
           </h1>
           <p className="text-lg text-muted-foreground font-sans font-light max-w-md mx-auto md:mx-0 mb-8">
-            Handcrafted desserts made with the finest ingredients, baked fresh for every order in the heart of Valencia.
+            Postres artesanales elaborados con los mejores ingredientes, horneados al momento para cada pedido en el corazón de Valencia.
           </p>
           <a
             href="https://wa.me/34663110412"
@@ -27,7 +27,7 @@ const HeroSection = () => {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-lg font-sans font-medium text-sm uppercase tracking-wider hover:opacity-90 transition-opacity"
           >
-            Order Now
+            Pedir ahora
           </a>
         </motion.div>
 
@@ -40,7 +40,7 @@ const HeroSection = () => {
           <div className="relative w-72 md:w-96">
             <img
               src={heroCake}
-              alt="Artisan Rogel cake"
+              alt="Torta Rogel artesanal"
               className="w-full h-auto rounded-3xl shadow-2xl object-cover"
             />
             <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-accent/20 rounded-full blur-2xl" />

@@ -15,13 +15,13 @@ const AboutSection = () => {
             Nuestra historia
           </p>
           <h2 className="text-4xl md:text-5xl font-serif font-medium text-foreground mb-8">
-            About <span className="italic">Chocolate</span>
+            Sobre <span className="italic">Chocolate</span>
           </h2>
           <p className="text-muted-foreground font-sans leading-relaxed mb-6">
-            Born from a family passion for baking, <strong className="text-foreground font-medium">Chocolate</strong> brings the rich traditions of Argentine pastry to the vibrant streets of Valencia. Every recipe has been perfected over generations, using only the finest ingredients — real butter, premium chocolate, and hand-whipped dulce de leche.
+            Nacido de una pasión familiar por la repostería, <strong className="text-foreground font-medium">Chocolate</strong> lleva las ricas tradiciones de la pastelería argentina a las calles de Valencia. Cada receta se ha perfeccionado durante generaciones, con los mejores ingredientes: manteca real, chocolate premium y dulce de leche batido a mano.
           </p>
           <p className="text-muted-foreground font-sans leading-relaxed">
-            We believe that the best desserts are made with patience, love, and attention to every detail. Each cake is baked fresh to order, because you deserve nothing less than perfection.
+            Creemos que los mejores postres se hacen con paciencia, amor y atención al detalle. Cada torta se hornea al momento, porque no te merecés menos que lo mejor.
           </p>
           <div className="mt-10 flex items-center justify-center gap-1 text-accent">
             <span className="text-2xl">✦</span>

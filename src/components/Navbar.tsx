@@ -33,7 +33,7 @@ const Navbar = () => {
         <button
           onClick={() => setOpen(!open)}
           className="md:hidden p-2 text-foreground"
-          aria-label="Toggle menu"
+          aria-label="Abrir o cerrar menú"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             {open ? (

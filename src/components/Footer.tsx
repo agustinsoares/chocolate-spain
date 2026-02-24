@@ -7,7 +7,7 @@ const Footer = () => {
             CHOCOLATE
           </h3>
           <p className="text-primary-foreground/60 font-sans text-sm max-w-sm">
-            Artisan pastry made with love in Valencia, España.
+            Pastelería artesanal hecha con amor en Valencia, España.
           </p>
           <a
             href="https://instagram.com/chocolatespain"

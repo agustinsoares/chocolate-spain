@@ -9,32 +9,32 @@ import applePieImg from "@/assets/apple-pie.jpg";
 const products = [
   {
     name: "Rogel",
-    description: "Layers of delicate pastry filled with dulce de leche, topped with Italian meringue.",
+    description: "Capas de masa delicada rellenas de dulce de leche, coronadas con merengue italiano.",
     image: rogelImg,
   },
   {
-    name: "Key Lime Pie",
-    description: "A tangy and creamy lime filling on a buttery graham cracker crust.",
+    name: "Tarta de lima",
+    description: "Relleno cremoso de lima sobre base de galleta tipo graham.",
     image: keyLimeImg,
   },
   {
     name: "Torta Marquise",
-    description: "Rich dark chocolate mousse cake with a velvety ganache glaze.",
+    description: "Torta de mousse de chocolate negro con glaseado de ganache sedoso.",
     image: marquiseImg,
   },
   {
     name: "Havanette",
-    description: "Classic Argentine sandwich cookies filled with dulce de leche.",
+    description: "Galletitas sandwich argentinas rellenas de dulce de leche.",
     image: havanetteImg,
   },
   {
     name: "Brownies",
-    description: "Fudgy, dense chocolate brownies made with premium cocoa.",
+    description: "Brownies de chocolate densos y cremosos con cacao premium.",
     image: browniesImg,
   },
   {
-    name: "Apple Pie",
-    description: "Homestyle apple pie with a golden lattice crust and warm spices.",
+    name: "Tarta de manzana",
+    description: "Tarta de manzana casera con base en lattice dorada y especias.",
     image: applePieImg,
   },
 ];
@@ -59,7 +59,7 @@ const ProductGrid = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground mb-3 font-sans">
-            Our selection
+            Nuestra selección
           </p>
           <h2 className="text-4xl md:text-5xl font-serif font-medium text-foreground">
             Nuestras Delicias
