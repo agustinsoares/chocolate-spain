@@ -18,11 +18,11 @@ const HeroSection = () => {
             Valencia, España
           </p>
           <h1 className="text-5xl md:text-7xl font-serif font-medium leading-tight text-foreground mb-6">
-            Pastelería artesanal<br />
+            Pastelería <br />100% artesanal<br />
             <span className="italic text-accent">hecha con amor</span>
           </h1>
           <p className="text-lg text-muted-foreground font-sans font-light max-w-md mx-auto md:mx-0 mb-8">
-            Postres artesanales elaborados con los mejores ingredientes, horneados al momento para cada pedido en el corazón de Valencia.
+            Elaboración de tartas y brownies con los mejores ingredientes, horneados especialmente para vos.
           </p>
           <a
             href={WHATSAPP_HREF}

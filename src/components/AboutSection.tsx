@@ -18,10 +18,13 @@ const AboutSection = () => {
             Sobre <span className="italic">Chocolate</span>
           </h2>
           <p className="text-muted-foreground font-sans leading-relaxed mb-6">
-            Nacido de una pasión familiar por la repostería, <strong className="text-foreground font-medium">Chocolate</strong> lleva las ricas tradiciones de la pastelería argentina a las calles de Valencia. Cada receta se ha perfeccionado durante generaciones, con los mejores ingredientes: manteca real, chocolate premium y dulce de leche batido a mano.
+            Este emprendimiento nació después de años elaborando postres, tartas y brownies para familiares y amigos. Con nuestra llegada a Valencia, esta tradición se transformó en un negocio que busca compartir los sabores argentinos, para que puedan ser disfrutados tanto por españoles como por latinoamericanos que encuentran en cada bocado la nostalgia de sus raíces.
+          </p>
+          <p className="text-muted-foreground font-sans leading-relaxed mb-6">
+            Nuestro principal objetivo en <strong className="text-foreground font-medium">Chocolate</strong> es que cada cliente pueda, a través de una porción de tarta o unos deliciosos brownies, convertir cualquier momento en algo especial.
           </p>
           <p className="text-muted-foreground font-sans leading-relaxed">
-            Creemos que los mejores postres se hacen con paciencia, amor y atención al detalle. Cada torta se hornea al momento, porque no te merecés menos que lo mejor.
+            Creemos que las mejores recetas se crean con amor, dedicación y atención al detalle. Por eso, cada tarta se elabora de manera artesanal, con el mismo cariño de siempre. Porque no solo horneamos, sino que creamos momentos para disfrutar.
           </p>
           <div className="mt-10 flex items-center justify-center gap-1 text-accent">
             <span className="text-2xl">✦</span>

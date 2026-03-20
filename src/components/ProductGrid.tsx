@@ -1,41 +1,47 @@
 import { motion } from "framer-motion";
-import rogelImg from "@/assets/rogel.jpg";
-import keyLimeImg from "@/assets/key-lime-pie.jpg";
-import marquiseImg from "@/assets/marquise.jpg";
-import havanetteImg from "@/assets/havanette.jpg";
-import browniesImg from "@/assets/brownies.jpg";
-import applePieImg from "@/assets/apple-pie.jpg";
+import rogelImg from "@/assets/rogel.png";
+import keyLimeImg from "@/assets/key-lime-pie.png";
+import marquiseImg from "@/assets/marquise.png";
+import havanetteImg from "@/assets/havanette.png";
+import browniesImg from "@/assets/brownies.png";
+import applePieImg from "@/assets/apple-pie.png";
+import appleCrumbleImg from "@/assets/apple-crumble.png";
 
 const products = [
   {
     name: "Rogel",
-    description: "Capas de masa delicada rellenas de dulce de leche, coronadas con merengue italiano.",
+    description: "Crocantes capas recubiertas del más delicioso dulce de leche y coronadas con merengue italiano.",
     image: rogelImg,
   },
   {
     name: "Tarta de lima",
-    description: "Relleno cremoso de lima sobre base de galleta tipo graham.",
+    description: "Base crujiente, deliciosa y suave crema de limas y decorada con nata montada.",
     image: keyLimeImg,
   },
   {
     name: "Torta Marquise",
-    description: "Torta de mousse de chocolate negro con glaseado de ganache sedoso.",
+    description: "Base húmeda de brownie, dulce de leche y nata montada.",
     image: marquiseImg,
   },
   {
     name: "Havanette",
-    description: "Galletitas sandwich argentinas rellenas de dulce de leche.",
+    description: "Masa sablé rellena de dulce de leche y cubierta de una fina y suave capa de chocolate.",
     image: havanetteImg,
   },
   {
     name: "Brownies",
-    description: "Brownies de chocolate densos y cremosos con cacao premium.",
+    description: "Crujientes por fuera y húmedos y deliciosos por dentro.",
     image: browniesImg,
   },
   {
     name: "Tarta de manzana",
-    description: "Tarta de manzana casera con base en lattice dorada y especias.",
+    description: "Tierna masa rellena de deliciosas manzanas con canela y cubierta de almendras fileteadas.",
     image: applePieImg,
+  },
+  {
+    name: "Apple Crumble",
+    description: "Base de masa tierna, relleno de manzanas con canela y topping de crujiente crumble.",
+    image: appleCrumbleImg,
   },
 ];
 

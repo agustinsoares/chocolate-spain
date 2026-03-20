@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import logoImg from "@/assets/logo.svg";
 
 const WHATSAPP_ORDER_MESSAGE = "Hola! Me encantaría hacerte un pedido.";
 const WHATSAPP_HREF = `https://wa.me/34663110412?text=${encodeURIComponent(WHATSAPP_ORDER_MESSAGE)}`;
@@ -10,8 +11,8 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="#" className="text-xl font-serif font-semibold tracking-wide text-foreground">
-          CHOCOLATE
+        <a href="#">
+          <img src={logoImg} alt="Chocolate" className="h-7 w-auto" />
         </a>
         
         {/* Desktop */}
