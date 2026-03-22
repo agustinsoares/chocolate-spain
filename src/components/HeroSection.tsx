@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import heroCake from "@/assets/hero-cake.jpg";
+import heroCake from "@/assets/hero-cake.png";
 
 const WHATSAPP_ORDER_MESSAGE = "Hola! Me encantaría hacerte un pedido.";
 const WHATSAPP_HREF = `https://wa.me/34663110412?text=${encodeURIComponent(WHATSAPP_ORDER_MESSAGE)}`;
@@ -22,7 +22,7 @@ const HeroSection = () => {
             <span className="italic text-accent">hecha con amor</span>
           </h1>
           <p className="text-lg text-muted-foreground font-sans font-light max-w-md mx-auto md:mx-0 mb-8">
-            Elaboración de tartas y brownies con los mejores ingredientes, horneados especialmente para vos.
+            Elaboración de tartas y brownies con los mejores ingredientes, horneados especialmente para tí.
           </p>
           <a
             href={WHATSAPP_HREF}
