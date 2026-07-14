@@ -184,7 +184,7 @@ const ProductCard = ({ product, compact }: { product: Product; compact: boolean 
         </h3>
         <p
           className={`text-muted-foreground font-sans leading-relaxed ${
-            compact ? "text-xs mb-3 line-clamp-3 sm:text-sm sm:mb-4 sm:line-clamp-none" : "text-sm mb-4"
+            compact ? "text-xs mb-3 min-h-[100px] sm:text-sm sm:mb-4 sm:min-h-0" : "text-sm mb-4"
           }`}
         >
           {product.description}
