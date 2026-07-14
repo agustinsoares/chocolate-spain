@@ -28,6 +28,24 @@ const clientStories: ClientStory[] = [
     text: "Encontrar sabores argentinos aquí en Valencia fue una gran sorpresa. El rogel es espectacular.",
     rating: 4,
   },
+  {
+    name: "Sofía Martínez",
+    photo: "",
+    text: "La torta Marquise es un pecado, húmeda y con la cantidad justa de dulce de leche. Llegó impecable a domicilio.",
+    rating: 4.5,
+  },
+  {
+    name: "Diego Herrera",
+    photo: "",
+    text: "El apple crumble tiene el punto exacto entre la manzana con canela y el crumble crocante. Ya es un clásico en casa.",
+    rating: 5,
+  },
+  {
+    name: "Lucía Romero",
+    photo: "",
+    text: "Pedí Havanette para agasajar a mi familia y no quedó ni un pedazo. Se nota que está hecho con dedicación.",
+    rating: 4,
+  },
 ];
 
 const container = {
@@ -52,14 +70,17 @@ const getInitials = (name: string) =>
 
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5" aria-label={`${rating} de 5 estrellas`}>
-    {Array.from({ length: 5 }).map((_, index) => (
-      <Star
-        key={index}
-        className={`w-4 h-4 ${
-          index < rating ? "fill-accent text-accent" : "fill-none text-muted-foreground/40"
-        }`}
-      />
-    ))}
+    {Array.from({ length: 5 }).map((_, index) => {
+      const fillAmount = Math.min(Math.max(rating - index, 0), 1) * 100;
+      return (
+        <span key={index} className="relative w-4 h-4">
+          <Star className="absolute inset-0 w-4 h-4 fill-none text-muted-foreground/40" />
+          <span className="absolute inset-0 overflow-hidden" style={{ width: `${fillAmount}%` }}>
+            <Star className="w-4 h-4 fill-accent text-accent" />
+          </span>
+        </span>
+      );
+    })}
   </div>
 );
 
