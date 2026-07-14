@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import rogelImg from "@/assets/rogel.png";
 import keyLimeImg from "@/assets/key-lime-pie.png";
 import marquiseImg from "@/assets/marquise.png";
@@ -73,19 +73,71 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
+const useHoverCapable = () => {
+  const [hoverCapable, setHoverCapable] = useState(
+    () => window.matchMedia("(hover: hover) and (pointer: fine)").matches
+  );
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const handleChange = (event: MediaQueryListEvent) => setHoverCapable(event.matches);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  return hoverCapable;
+};
+
 const ProductCard = ({ product }: { product: Product }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaRef = useRef<HTMLDivElement>(null);
+  const isHoverCapable = useHoverCapable();
+
+  // isPlaying tracks the video's actual playback state (not just intent), so the
+  // photo/video crossfade only happens once a frame is ready — no black flash on mobile.
+  useEffect(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+    const handlePlaying = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    videoEl.addEventListener("playing", handlePlaying);
+    videoEl.addEventListener("pause", handlePause);
+    return () => {
+      videoEl.removeEventListener("playing", handlePlaying);
+      videoEl.removeEventListener("pause", handlePause);
+    };
+  }, []);
+
+  // On touch devices there's no hover, so autoplay the video as it scrolls into view.
+  useEffect(() => {
+    if (isHoverCapable || !product.video) return;
+    const node = mediaRef.current;
+    const videoEl = videoRef.current;
+    if (!node || !videoEl) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          videoEl.play().catch(() => {});
+        } else {
+          videoEl.pause();
+          videoEl.currentTime = 0;
+        }
+      },
+      { threshold: 0.6 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isHoverCapable, product.video]);
 
   const handleMouseEnter = () => {
-    if (!product.video) return;
-    setIsPlaying(true);
-    videoRef.current?.play();
+    if (!product.video || !isHoverCapable) return;
+    videoRef.current?.play().catch(() => {});
   };
 
   const handleMouseLeave = () => {
-    if (!product.video) return;
-    setIsPlaying(false);
+    if (!product.video || !isHoverCapable) return;
     const videoEl = videoRef.current;
     if (videoEl) {
       videoEl.pause();
@@ -100,7 +152,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="aspect-square overflow-hidden relative">
+      <div ref={mediaRef} className="aspect-square overflow-hidden relative">
         <img
           src={product.image}
           alt={product.name}
@@ -115,7 +167,7 @@ const ProductCard = ({ product }: { product: Product }) => {
             muted
             loop
             playsInline
-            preload="none"
+            preload="metadata"
             className={`absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${
               isPlaying ? "opacity-100" : "opacity-0"
             }`}
