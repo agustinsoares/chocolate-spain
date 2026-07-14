@@ -23,6 +23,9 @@ const Navbar = () => {
           <a href="#about" className="text-sm font-sans text-muted-foreground hover:text-foreground transition-colors">
             Nosotros
           </a>
+          <a href="#client-stories" className="text-sm font-sans text-muted-foreground hover:text-foreground transition-colors">
+            Clientes
+          </a>
           <a
             href={WHATSAPP_HREF}
             target="_blank"
@@ -64,6 +67,9 @@ const Navbar = () => {
               </a>
               <a href="#about" onClick={() => setOpen(false)} className="text-sm font-sans text-muted-foreground">
                 Nosotros
+              </a>
+              <a href="#client-stories" onClick={() => setOpen(false)} className="text-sm font-sans text-muted-foreground">
+                Clientes
               </a>
               <a
                 href={WHATSAPP_HREF}
