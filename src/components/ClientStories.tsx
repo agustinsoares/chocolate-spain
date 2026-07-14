@@ -104,11 +104,13 @@ const ClientStories = () => {
           viewport={{ once: true, margin: "-50px" }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {clientStories.map((story) => (
+          {clientStories.map((story, index) => (
             <motion.div
               key={story.name}
               variants={item}
-              className="bg-card rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col"
+              className={`bg-card rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow duration-300 flex-col ${
+                index < 3 ? "flex" : "hidden sm:flex"
+              }`}
             >
               <div className="flex items-center gap-4 mb-4">
                 <Avatar className="h-14 w-14">
