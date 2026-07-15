@@ -34,6 +34,45 @@ const fetchProductos = async (): Promise<Producto[]> => {
 const ProductCard = ({ producto }: { producto: Producto }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaRef = useRef<HTMLDivElement>(null);
+  const isHoverCapable = useHoverCapable();
+
+  // isPlaying tracks the video's actual playback state (not just intent), so the
+  // photo/video crossfade only happens once a frame is ready — no black flash on mobile.
+  useEffect(() => {
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+    const handlePlaying = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    videoEl.addEventListener("playing", handlePlaying);
+    videoEl.addEventListener("pause", handlePause);
+    return () => {
+      videoEl.removeEventListener("playing", handlePlaying);
+      videoEl.removeEventListener("pause", handlePause);
+    };
+  }, []);
+
+  // On touch devices there's no hover, so autoplay the video as it scrolls into view.
+  useEffect(() => {
+    if (isHoverCapable || !product.video) return;
+    const node = mediaRef.current;
+    const videoEl = videoRef.current;
+    if (!node || !videoEl) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          videoEl.play().catch(() => {});
+        } else {
+          videoEl.pause();
+          videoEl.currentTime = 0;
+        }
+      },
+      { threshold: 0.6 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [isHoverCapable, product.video]);
 
   const agotado = producto.cupo_disponible !== null && producto.cupo_disponible <= 0;
 
@@ -129,7 +168,7 @@ const ProductGrid = () => {
   return (
     <section id="products" className="py-20 bg-background">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground mb-3 font-sans">
             Nuestra selección
           </p>
