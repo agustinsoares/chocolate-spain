@@ -1,8 +1,11 @@
 import { useState } from "react";
 import logo from "@/assets/logo.svg";
 import AdminPedidos from "./admin/AdminPedidos";
+import AdminProductos from "./admin/AdminProductos";
+import AdminUsuarios from "./admin/AdminUsuarios";
+import AdminCatalogo from "./admin/AdminCatalogo";
 
-type Tab = "pedidos" | "productos" | "usuarios";
+type Tab = "pedidos" | "productos" | "usuarios" | "catalogo";
 
 const Admin = () => {
   const [tab, setTab] = useState<Tab>("pedidos");
@@ -11,6 +14,7 @@ const Admin = () => {
     { id: "pedidos", label: "Pedidos" },
     { id: "productos", label: "Productos" },
     { id: "usuarios", label: "Usuarios" },
+    { id: "catalogo", label: "Catálogo" },
   ];
 
   return (
@@ -39,16 +43,9 @@ const Admin = () => {
         </div>
 
         {tab === "pedidos" && <AdminPedidos />}
-        {tab === "productos" && (
-          <p className="text-muted-foreground font-sans">
-            Próximamente: alta, edición y baja de productos.
-          </p>
-        )}
-        {tab === "usuarios" && (
-          <p className="text-muted-foreground font-sans">
-            Próximamente: gestión de usuarios y roles.
-          </p>
-        )}
+        {tab === "productos" && <AdminProductos />}
+        {tab === "usuarios" && <AdminUsuarios />}
+        {tab === "catalogo" && <AdminCatalogo />}
       </div>
     </section>
   );
