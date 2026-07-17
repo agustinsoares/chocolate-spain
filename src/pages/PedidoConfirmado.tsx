@@ -5,8 +5,8 @@ const PedidoConfirmado = () => {
     const pedidoId = searchParams.get("pedido");
 
     return (
-        <section className="py-20 bg-background min-h-screen">
-            <div className="container mx-auto px-6 max-w-md text-center">
+        <section className="min-h-screen bg-background flex items-center justify-center px-6 py-20">
+            <div className="max-w-md text-center">
                 <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground mb-3 font-sans">
                     ¡Gracias!
                 </p>
