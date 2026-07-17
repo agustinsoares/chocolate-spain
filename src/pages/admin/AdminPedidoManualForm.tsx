@@ -153,7 +153,7 @@ const AdminPedidoManualForm = ({ onCreado }: { onCreado: () => void }) => {
     <form onSubmit={handleSubmit} className="space-y-6 bg-card rounded-2xl p-6 border border-border">
       <div>
         <Label>Agregar producto</Label>
-        <div className="flex gap-2 mt-2">
+        <div className="flex flex-col sm:flex-row gap-2 mt-2">
           <select
             value={productoSeleccionado}
             onChange={(e) => setProductoSeleccionado(e.target.value)}
@@ -166,16 +166,18 @@ const AdminPedidoManualForm = ({ onCreado }: { onCreado: () => void }) => {
               </option>
             ))}
           </select>
-          <Input
-            type="number"
-            min={1}
-            value={cantidadSeleccionada}
-            onChange={(e) => setCantidadSeleccionada(Number(e.target.value))}
-            className="w-20"
-          />
-          <Button type="button" onClick={agregarItem}>
-            Agregar
-          </Button>
+          <div className="flex gap-2">
+            <Input
+              type="number"
+              min={1}
+              value={cantidadSeleccionada}
+              onChange={(e) => setCantidadSeleccionada(Number(e.target.value))}
+              className="w-20 flex-shrink-0"
+            />
+            <Button type="button" onClick={agregarItem} className="flex-1 sm:flex-none">
+              Agregar
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -205,7 +207,7 @@ const AdminPedidoManualForm = ({ onCreado }: { onCreado: () => void }) => {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label>Nombre</Label>
           <Input value={nombre} onChange={(e) => setNombre(e.target.value)} />
@@ -215,7 +217,7 @@ const AdminPedidoManualForm = ({ onCreado }: { onCreado: () => void }) => {
           <Input value={apellidos} onChange={(e) => setApellidos(e.target.value)} />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label>Teléfono</Label>
           <Input value={telefono} onChange={(e) => setTelefono(e.target.value)} />
@@ -254,7 +256,7 @@ const AdminPedidoManualForm = ({ onCreado }: { onCreado: () => void }) => {
             <Label>Dirección</Label>
             <Input value={direccion} onChange={(e) => setDireccion(e.target.value)} />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label>Población</Label>
               <Input value={poblacion} onChange={(e) => setPoblacion(e.target.value)} />
