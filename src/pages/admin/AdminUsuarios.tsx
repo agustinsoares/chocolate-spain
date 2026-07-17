@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/contexts/AuthContext";
+import { Input } from "@/components/ui/input";
 import type { Database } from "@/types/database";
 
 type Perfil = Database["public"]["Tables"]["perfiles"]["Row"];
@@ -18,6 +20,7 @@ const fetchPerfiles = async (): Promise<Perfil[]> => {
 const AdminUsuarios = () => {
   const { session, user } = useAuth();
   const queryClient = useQueryClient();
+  const [busqueda, setBusqueda] = useState("");
 
   const { data: perfiles, isLoading } = useQuery({
     queryKey: ["admin-perfiles"],
@@ -67,46 +70,69 @@ const AdminUsuarios = () => {
     return <p className="text-muted-foreground font-sans">Cargando usuarios...</p>;
   }
 
+  const termino = busqueda.trim().toLowerCase();
+  const perfilesFiltrados = (perfiles ?? []).filter((p) => {
+    if (!termino) return true;
+    return (
+      p.nombre.toLowerCase().includes(termino) ||
+      p.apellidos.toLowerCase().includes(termino) ||
+      p.email.toLowerCase().includes(termino)
+    );
+  });
+
   return (
-    <div className="space-y-3">
-      {perfiles?.map((perfil) => (
-        <div
-          key={perfil.id}
-          className="bg-card rounded-xl border border-border p-4 flex flex-wrap items-center justify-between gap-4"
-        >
-          <div className="font-sans">
-            <p className="font-medium text-foreground">
-              {perfil.nombre} {perfil.apellidos}
-              {perfil.id === user?.id && (
-                <span className="text-xs text-muted-foreground"> (vos)</span>
-              )}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {perfil.email} · {perfil.telefono ?? "sin teléfono"}
-            </p>
-          </div>
+    <div className="space-y-4">
+      <Input
+        placeholder="Buscar por nombre, apellido o email..."
+        value={busqueda}
+        onChange={(e) => setBusqueda(e.target.value)}
+        className="max-w-md"
+      />
 
-          <div className="flex items-center gap-3 font-sans text-sm">
-            <select
-              value={perfil.rol}
-              onChange={(e) => cambiarRol(perfil, e.target.value as "cliente" | "admin")}
-              className="border border-border rounded-md px-3 py-2 bg-background"
-            >
-              <option value="cliente">Cliente</option>
-              <option value="admin">Admin</option>
-            </select>
+      {perfilesFiltrados.length === 0 && (
+        <p className="text-muted-foreground font-sans">No se encontraron usuarios.</p>
+      )}
 
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={perfil.activo}
-                onChange={(e) => cambiarActivo(perfil, e.target.checked)}
-              />
-              Activo
-            </label>
+      <div className="space-y-3">
+        {perfilesFiltrados.map((perfil) => (
+          <div
+            key={perfil.id}
+            className="bg-card rounded-xl border border-border p-4 flex flex-wrap items-center justify-between gap-4"
+          >
+            <div className="font-sans">
+              <p className="font-medium text-foreground">
+                {perfil.nombre} {perfil.apellidos}
+                {perfil.id === user?.id && (
+                  <span className="text-xs text-muted-foreground"> (vos)</span>
+                )}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {perfil.email} · {perfil.telefono ?? "sin teléfono"}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 font-sans text-sm">
+              <select
+                value={perfil.rol}
+                onChange={(e) => cambiarRol(perfil, e.target.value as "cliente" | "admin")}
+                className="border border-border rounded-md px-3 py-2 bg-background"
+              >
+                <option value="cliente">Cliente</option>
+                <option value="admin">Admin</option>
+              </select>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={perfil.activo}
+                  onChange={(e) => cambiarActivo(perfil, e.target.checked)}
+                />
+                Activo
+              </label>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
