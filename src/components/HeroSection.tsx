@@ -1,8 +1,31 @@
 import { motion } from "framer-motion";
 import heroCake from "@/assets/hero-cake.png";
 
-const WHATSAPP_ORDER_MESSAGE = "Hola! Me encantaría hacerte un pedido.";
-const WHATSAPP_HREF = `https://wa.me/34663110412?text=${encodeURIComponent(WHATSAPP_ORDER_MESSAGE)}`;
+const easeInOutCubic = (t: number) =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+const scrollToProducts = () => {
+  const target = document.getElementById("products");
+  if (!target) return;
+
+  const startY = window.scrollY;
+  const targetY = target.getBoundingClientRect().top + startY;
+  const distance = targetY - startY;
+  const duration = 1200; // ms — transición despacio, a propósito
+  let startTime: number | null = null;
+
+  const step = (currentTime: number) => {
+    if (startTime === null) startTime = currentTime;
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    window.scrollTo(0, startY + distance * easeInOutCubic(progress));
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  };
+
+  requestAnimationFrame(step);
+};
 
 const HeroSection = () => {
   return (
@@ -24,14 +47,13 @@ const HeroSection = () => {
           <p className="text-lg text-muted-foreground font-sans font-light max-w-md mx-auto md:mx-0 mb-8">
             Elaboración de tartas y brownies con los mejores ingredientes, horneados especialmente para tí.
           </p>
-          <a
-            href={WHATSAPP_HREF}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={scrollToProducts}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-lg font-sans font-medium text-sm uppercase tracking-wider hover:opacity-90 transition-opacity"
           >
             Pedir ahora
-          </a>
+          </button>
         </motion.div>
 
         <motion.div
@@ -40,11 +62,11 @@ const HeroSection = () => {
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           className="flex-1 flex justify-center"
         >
-          <div className="relative w-72 md:w-96">
+          <div className="relative w-3/4 h-[260px] mx-auto md:w-96 md:h-auto">
             <img
               src={heroCake}
               alt="Torta Rogel artesanal"
-              className="w-full h-auto rounded-3xl shadow-2xl object-cover"
+              className="w-full h-full md:h-auto rounded-3xl shadow-2xl object-cover"
             />
             <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-accent/20 rounded-full blur-2xl" />
             <div className="absolute -top-4 -left-4 w-32 h-32 bg-secondary rounded-full blur-3xl" />

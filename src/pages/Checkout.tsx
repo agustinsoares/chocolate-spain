@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,7 +18,6 @@ function fechaMinima(): string {
 const Checkout = () => {
     const { items, totalPrecio, clearCart } = useCart();
     const { session } = useAuth();
-    const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
     const [metodoEntrega, setMetodoEntrega] = useState<"retiro" | "domicilio">("retiro");
@@ -29,10 +28,12 @@ const Checkout = () => {
     const [fechaEntrega, setFechaEntrega] = useState(fechaMinima());
     const [notas, setNotas] = useState("");
 
-    if (!session) {
-        navigate("/login");
-        return null;
-    }
+    // Solo hacen falta si no hay sesión — si estás logueado, el backend
+    // saca estos datos de tu perfil.
+    const [nombre, setNombre] = useState("");
+    const [apellidos, setApellidos] = useState("");
+    const [telefono, setTelefono] = useState("");
+    const [email, setEmail] = useState("");
 
     if (items.length === 0) {
         return (
@@ -55,15 +56,22 @@ const Checkout = () => {
             return;
         }
 
+        if (!session && (!nombre || !apellidos || !telefono || !email)) {
+            toast.error("Completá tus datos de contacto");
+            return;
+        }
+
         setLoading(true);
 
         try {
+            const headers: Record<string, string> = { "Content-Type": "application/json" };
+            if (session) {
+                headers.Authorization = `Bearer ${session.access_token}`;
+            }
+
             const res = await fetch("/api/crear-sesion-checkout", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${session.access_token}`,
-                },
+                headers,
                 body: JSON.stringify({
                     items: items.map((i) => ({ productoId: i.productoId, cantidad: i.cantidad })),
                     metodoEntrega,
@@ -73,6 +81,11 @@ const Checkout = () => {
                     codigoPostalEntrega: codigoPostal,
                     fechaEntrega,
                     notas,
+                    // Se ignoran en el backend si hay sesión iniciada.
+                    nombre,
+                    apellidos,
+                    telefono,
+                    email,
                 }),
             });
 
@@ -118,6 +131,40 @@ const Checkout = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
+                    {!session && (
+                        <div className="space-y-4 pb-2">
+                            <p className="text-xs text-muted-foreground font-sans">
+                                Podés pedir sin crear cuenta. Si preferís,{" "}
+                                <Link to="/login" className="text-primary hover:text-accent font-medium">
+                                    iniciá sesión
+                                </Link>{" "}
+                                y no vas a tener que cargar estos datos cada vez.
+                            </p>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label>Nombre</Label>
+                                    <Input value={nombre} onChange={(e) => setNombre(e.target.value)} />
+                                </div>
+                                <div>
+                                    <Label>Apellidos</Label>
+                                    <Input value={apellidos} onChange={(e) => setApellidos(e.target.value)} />
+                                </div>
+                            </div>
+                            <div>
+                                <Label>Teléfono</Label>
+                                <Input value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+                            </div>
+                            <div>
+                                <Label>Email</Label>
+                                <Input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    )}
+
                     <div>
                         <Label>Método de entrega</Label>
                         <div className="flex gap-4 mt-2">
