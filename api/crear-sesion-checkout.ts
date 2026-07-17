@@ -85,6 +85,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .single();
 
   if (perfilError || !perfil) {
+    console.error("Error buscando perfil:", perfilError, "usuario.id:", usuario.id);
     res.status(400).json({ error: "No se encontró el perfil del usuario" });
     return;
   }
