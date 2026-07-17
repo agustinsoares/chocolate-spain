@@ -71,7 +71,7 @@ async function marcarComoPagadoYAvisar(supabaseAdmin: any, pedidoId: number) {
 
     try {
         await resend.emails.send({
-            from: "Chocolate <onboarding@resend.dev>",
+            from: "Chocolate Spain <onboarding@resend.dev>",
             to: pedido.cliente_email,
             subject: `¡Tu pedido #${pedido.id} fue confirmado!`,
             html: `
