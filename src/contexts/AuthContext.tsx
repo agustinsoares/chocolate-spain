@@ -27,7 +27,7 @@ interface AuthContextValue {
   signUp: (
     input: SignUpInput
   ) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: string | null; rol: "cliente" | "admin" | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -102,9 +102,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message };
-    return { error: null };
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message, rol: null };
+
+    const { data: perfilData } = await supabase
+      .from("perfiles")
+      .select("rol")
+      .eq("id", data.user.id)
+      .single();
+
+    return { error: null, rol: perfilData?.rol ?? "cliente" };
   };
 
   const signOut = async () => {

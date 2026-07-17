@@ -35,7 +35,7 @@ const Login = () => {
 
   const onSubmit = async (values: LoginForm) => {
     setLoading(true);
-    const { error } = await signIn(values.email, values.password);
+    const { error, rol } = await signIn(values.email, values.password);
     setLoading(false);
 
     if (error) {
@@ -44,7 +44,7 @@ const Login = () => {
     }
 
     toast.success("¡Bienvenido/a de nuevo!");
-    navigate("/");
+    navigate(rol === "admin" ? "/admin" : "/");
   };
 
   return (
