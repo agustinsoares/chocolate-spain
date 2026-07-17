@@ -30,7 +30,7 @@ function buffer(req: VercelRequest): Promise<Buffer> {
     });
 }
 
-async function marcarComoPagadoYAvisar(supabaseAdmin: ReturnType<typeof createClient>, pedidoId: number) {
+async function marcarComoPagadoYAvisar(supabaseAdmin: any, pedidoId: number) {
     const { data: estadoPagado } = await supabaseAdmin
         .from("estados_pago")
         .select("id")
@@ -61,7 +61,7 @@ async function marcarComoPagadoYAvisar(supabaseAdmin: ReturnType<typeof createCl
 
     const filas = (detalle ?? [])
         .map(
-            (d) =>
+            (d: any) =>
                 `<tr><td style="padding:4px 8px">${d.cantidad}x ${d.producto_nombre}</td><td style="padding:4px 8px;text-align:right">${(d.precio_unitario * d.cantidad).toFixed(2)} €</td></tr>`
         )
         .join("");
