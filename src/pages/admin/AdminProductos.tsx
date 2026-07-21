@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,18 +19,18 @@ const fetchProductosAdmin = async (): Promise<Producto[]> => {
   return data ?? [];
 };
 
-const subirArchivo = async (
-  file: File,
-  productoId: number | string,
-  tipo: "imagen" | "video"
-): Promise<string> => {
-  const ext = file.name.split(".").pop();
-  const path = `${productoId}-${tipo}-${Date.now()}.${ext}`;
-  const { error } = await supabase.storage.from("productos").upload(path, file, { upsert: true });
-  if (error) throw error;
-  const { data } = supabase.storage.from("productos").getPublicUrl(path);
-  return data.publicUrl;
-};
+const fileToBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // reader.result viene como "data:image/png;base64,AAAA..." — nos
+      // quedamos solo con la parte de después de la coma.
+      resolve(result.split(",")[1]);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
 interface FormState {
   nombre: string;
@@ -53,6 +54,7 @@ const vacio: FormState = {
 
 const AdminProductos = () => {
   const queryClient = useQueryClient();
+  const { session } = useAuth();
   const { data: productos, isLoading } = useQuery({
     queryKey: ["admin-productos"],
     queryFn: fetchProductosAdmin,
@@ -153,11 +155,29 @@ const AdminProductos = () => {
   ) => {
     setSubiendo(true);
     try {
-      const url = await subirArchivo(file, productoId, tipo);
+      const ext = file.name.split(".").pop();
+      const fileName = `${productoId}-${tipo}-${Date.now()}.${ext}`;
+      const fileBase64 = await fileToBase64(file);
+
+      const res = await fetch("/api/subir-archivo-producto", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ fileBase64, fileName, contentType: file.type }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error ?? "No se pudo subir el archivo");
+        return;
+      }
+
       if (esNuevo) {
-        setFormNuevo((prev) => ({ ...prev, [tipo === "imagen" ? "imagenUrl" : "videoUrl"]: url }));
+        setFormNuevo((prev) => ({ ...prev, [tipo === "imagen" ? "imagenUrl" : "videoUrl"]: data.url }));
       } else {
-        setFormEdicion((prev) => ({ ...prev, [tipo === "imagen" ? "imagenUrl" : "videoUrl"]: url }));
+        setFormEdicion((prev) => ({ ...prev, [tipo === "imagen" ? "imagenUrl" : "videoUrl"]: data.url }));
       }
       toast.success(`${tipo === "imagen" ? "Imagen" : "Video"} subido`);
     } catch {
