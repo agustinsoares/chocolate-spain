@@ -11,6 +11,9 @@ type Producto = Database["public"]["Tables"]["productos"]["Row"];
 
 const WHATSAPP_URL = "https://wa.me/34663110412";
 
+const formatPrecio = (valor: number) =>
+  new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(valor);
+
 const container = {
   hidden: {},
   show: {
@@ -165,13 +168,19 @@ const ProductCard = ({ producto, compact }: { producto: Producto; compact: boole
         {producto.descripcion && (
           <p
             className={`text-muted-foreground font-sans leading-relaxed flex-1 ${compact
-                ? "text-xs mb-3 line-clamp-3 sm:text-sm sm:mb-4 sm:line-clamp-none"
-                : "text-sm mb-4"
+                ? "text-xs mb-2 line-clamp-3 sm:text-sm sm:mb-3 sm:line-clamp-none"
+                : "text-sm mb-3"
               }`}
           >
             {producto.descripcion}
           </p>
         )}
+        <p
+          className={`font-sans font-medium text-foreground ${compact ? "text-sm mb-3 sm:text-base sm:mb-4" : "text-base mb-4"
+            } ${!producto.descripcion ? "flex-1" : ""}`}
+        >
+          {formatPrecio(producto.precio)}
+        </p>
         {!agotado && (
           <div className="flex flex-col items-start gap-2">
             <a
