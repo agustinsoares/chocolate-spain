@@ -7,8 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+// Número de WhatsApp del negocio (mismo que en WhatsAppButton.tsx).
+// Mientras Stripe está deshabilitado, los pedidos se cierran por acá.
+const WHATSAPP_NUMERO = "34663110412";
+
 const formatPrecio = (valor: number) =>
     new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(valor);
+
+const formatFecha = (isoDate: string) => {
+    const [anio, mes, dia] = isoDate.split("-");
+    return `${dia}/${mes}/${anio}`;
+};
 
 function fechaMinima(): string {
     const min = new Date(Date.now() + 48 * 60 * 60 * 1000);
@@ -45,21 +54,70 @@ const Checkout = () => {
         );
     }
 
-    const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-
+    const datosCompletos = () => {
         if (
             metodoEntrega === "domicilio" &&
             (!direccion || !poblacion || !provincia || !codigoPostal)
         ) {
             toast.error("Completá la dirección de envío");
-            return;
+            return false;
         }
 
         if (!session && (!nombre || !apellidos || !telefono || !email)) {
             toast.error("Completá tus datos de contacto");
-            return;
+            return false;
         }
+
+        return true;
+    };
+
+    // --- Pedido por WhatsApp (activo mientras Stripe está deshabilitado) ---
+    const handleWhatsAppOrder = (e: FormEvent) => {
+        e.preventDefault();
+
+        if (!datosCompletos()) return;
+
+        const lineasProductos = items
+            .map((i) => `- ${i.cantidad}x ${i.nombre} (${formatPrecio(i.precio * i.cantidad)})`)
+            .join("\n");
+
+        const lineasEntrega =
+            metodoEntrega === "domicilio"
+                ? `Envío a domicilio: ${direccion}, ${poblacion}, ${provincia} (CP ${codigoPostal})`
+                : "Retiro en el local";
+
+        const lineasContacto = session
+            ? ""
+            : `\nNombre: ${nombre} ${apellidos}\nTeléfono: ${telefono}\nEmail: ${email}`;
+
+        const mensaje = [
+            "Hola! Quiero hacer este pedido:",
+            "",
+            lineasProductos,
+            "",
+            `Total: ${formatPrecio(totalPrecio)}`,
+            "",
+            lineasEntrega,
+            `Fecha de entrega deseada: ${formatFecha(fechaEntrega)}`,
+            notas ? `Notas: ${notas}` : "",
+            lineasContacto,
+        ]
+            .filter(Boolean)
+            .join("\n");
+
+        const url = `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, "_blank", "noopener,noreferrer");
+
+        clearCart();
+        toast.success("Te llevamos a WhatsApp para confirmar el pedido");
+    };
+
+    // --- Pago con Stripe (deshabilitado por ahora, se reactiva más adelante) ---
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const handleSubmitStripe = async (e: FormEvent) => {
+        e.preventDefault();
+
+        if (!datosCompletos()) return;
 
         setLoading(true);
 
@@ -81,7 +139,6 @@ const Checkout = () => {
                     codigoPostalEntrega: codigoPostal,
                     fechaEntrega,
                     notas,
-                    // Se ignoran en el backend si hay sesión iniciada.
                     nombre,
                     apellidos,
                     telefono,
@@ -130,7 +187,7 @@ const Checkout = () => {
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleWhatsAppOrder} className="space-y-5">
                     {!session && (
                         <div className="space-y-4 pb-2">
                             <p className="text-xs text-muted-foreground font-sans">
@@ -232,8 +289,8 @@ const Checkout = () => {
                         />
                     </div>
 
-                    <Button type="submit" className="w-full" disabled={loading}>
-                        {loading ? "Redirigiendo a pago..." : `Pagar ${formatPrecio(totalPrecio)}`}
+                    <Button type="submit" className="w-full bg-[#25D366] hover:bg-[#1ebe5a]" disabled={loading}>
+                        Pedir por WhatsApp
                     </Button>
                 </form>
             </div>
