@@ -8,12 +8,14 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import CartButton from "@/components/CartButton";
 import AdminRoute from "@/components/AdminRoute";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
 import Checkout from "./pages/Checkout";
 import PedidoConfirmado from "./pages/PedidoConfirmado";
 import Admin from "./pages/Admin";
+import MiCuenta from "./pages/MiCuenta";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,14 @@ const App = () => (
               <Route path="/registro" element={<Registro />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/pedido-confirmado" element={<PedidoConfirmado />} />
+              <Route
+                path="/mi-cuenta"
+                element={
+                  <ProtectedRoute>
+                    <MiCuenta />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/admin"
                 element={

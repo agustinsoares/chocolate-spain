@@ -24,6 +24,7 @@ interface AuthContextValue {
   user: User | null;
   perfil: Perfil | null;
   loading: boolean;
+  refreshPerfil: () => Promise<void>;
   signUp: (input: SignUpInput) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null; rol: "cliente" | "admin" | null }>;
   signOut: () => Promise<void>;
@@ -50,6 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     setPerfil(data);
+  };
+
+  const refreshPerfil = async () => {
+    if (user) await cargarPerfil(user.id);
   };
 
   useEffect(() => {
@@ -121,7 +126,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, perfil, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ session, user, perfil, loading, refreshPerfil, signUp, signIn, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   );
