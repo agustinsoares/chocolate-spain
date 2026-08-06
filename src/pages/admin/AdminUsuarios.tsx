@@ -82,6 +82,12 @@ const AdminUsuarios = () => {
 
   return (
     <div className="space-y-4">
+      <p className="text-sm text-muted-foreground font-sans max-w-2xl">
+        Los usuarios nuevos se crean activos como clientes. Para dar acceso al panel,
+        cambiá el rol a Admin acá o editá la columna <code className="text-xs">rol</code> en
+        la tabla <code className="text-xs">perfiles</code> del dashboard de Supabase.
+      </p>
+
       <Input
         placeholder="Buscar por nombre, apellido o email..."
         value={busqueda}

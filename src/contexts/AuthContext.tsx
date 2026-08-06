@@ -24,9 +24,7 @@ interface AuthContextValue {
   user: User | null;
   perfil: Perfil | null;
   loading: boolean;
-  signUp: (
-    input: SignUpInput
-  ) => Promise<{ error: string | null; needsEmailConfirmation: boolean }>;
+  signUp: (input: SignUpInput) => Promise<{ error: string | null }>;
   signIn: (email: string, password: string) => Promise<{ error: string | null; rol: "cliente" | "admin" | null }>;
   signOut: () => Promise<void>;
 }
@@ -85,20 +83,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async ({ nombre, apellidos, telefono, email, password }: SignUpInput) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { nombre, apellidos, telefono },
-      },
-    });
+    // Registro por API: usuario activo, confirmado y con rol cliente.
+    // El permiso admin se otorga después desde el panel o desde Supabase.
+    try {
+      const res = await fetch("/api/registro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, apellidos, telefono, email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) return { error: data.error ?? "No se pudo crear la cuenta" };
+    } catch {
+      return { error: "Error de conexión al crear la cuenta" };
+    }
 
-    if (error) return { error: error.message, needsEmailConfirmation: false };
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message };
 
-    // Si en Supabase Auth está activado "Confirm email", data.session viene
-    // null hasta que el usuario confirme desde su correo.
-    const needsEmailConfirmation = !data.session;
-    return { error: null, needsEmailConfirmation };
+    return { error: null };
   };
 
   const signIn = async (email: string, password: string) => {

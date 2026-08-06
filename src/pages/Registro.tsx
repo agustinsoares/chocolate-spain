@@ -51,7 +51,7 @@ const Registro = () => {
 
   const onSubmit = async (values: RegistroForm) => {
     setLoading(true);
-    const { error, needsEmailConfirmation } = await signUp(values);
+    const { error } = await signUp(values);
     setLoading(false);
 
     if (error) {
@@ -59,13 +59,8 @@ const Registro = () => {
       return;
     }
 
-    if (needsEmailConfirmation) {
-      toast.success("Revisá tu email para confirmar la cuenta");
-      navigate("/login");
-    } else {
-      toast.success("¡Cuenta creada!");
-      navigate("/");
-    }
+    toast.success("¡Cuenta creada!");
+    navigate("/");
   };
 
   return (
