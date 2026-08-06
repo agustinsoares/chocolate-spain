@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import type { Database } from "@/types/database";
 
 type Producto = Database["public"]["Tables"]["productos"]["Row"];
+type Perfil = Database["public"]["Tables"]["perfiles"]["Row"];
+type ModoCliente = "existente" | "nuevo";
 
 interface ItemCarritoManual {
   productoId: number;
@@ -34,16 +36,33 @@ const fetchProductosActivos = async (): Promise<Producto[]> => {
   return data ?? [];
 };
 
+const fetchClientes = async (): Promise<Perfil[]> => {
+  const { data, error } = await supabase
+    .from("perfiles")
+    .select("*")
+    .order("nombre");
+  if (error) throw error;
+  return data ?? [];
+};
+
 const AdminPedidoManualForm = ({ onCreado }: { onCreado: () => void }) => {
   const { session } = useAuth();
   const { data: productos } = useQuery({
     queryKey: ["admin-productos-activos"],
     queryFn: fetchProductosActivos,
   });
+  const { data: clientes, isLoading: cargandoClientes } = useQuery({
+    queryKey: ["admin-clientes-pedido-manual"],
+    queryFn: fetchClientes,
+  });
 
   const [items, setItems] = useState<ItemCarritoManual[]>([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState<string>("");
   const [cantidadSeleccionada, setCantidadSeleccionada] = useState(1);
+
+  const [modoCliente, setModoCliente] = useState<ModoCliente>("existente");
+  const [perfilId, setPerfilId] = useState("");
+  const [busquedaCliente, setBusquedaCliente] = useState("");
 
   const [nombre, setNombre] = useState("");
   const [apellidos, setApellidos] = useState("");
@@ -59,6 +78,43 @@ const AdminPedidoManualForm = ({ onCreado }: { onCreado: () => void }) => {
   const [loading, setLoading] = useState(false);
 
   const total = items.reduce((acc, i) => acc + i.precio * i.cantidad, 0);
+
+  const clientesFiltrados = useMemo(() => {
+    const termino = busquedaCliente.trim().toLowerCase();
+    const lista = clientes ?? [];
+    if (!termino) return lista;
+    return lista.filter(
+      (c) =>
+        c.nombre.toLowerCase().includes(termino) ||
+        c.apellidos.toLowerCase().includes(termino) ||
+        c.email.toLowerCase().includes(termino) ||
+        (c.telefono ?? "").toLowerCase().includes(termino)
+    );
+  }, [clientes, busquedaCliente]);
+
+  const clienteSeleccionado = clientes?.find((c) => c.id === perfilId) ?? null;
+
+  const aplicarCliente = (cliente: Perfil) => {
+    setPerfilId(cliente.id);
+    setNombre(cliente.nombre);
+    setApellidos(cliente.apellidos);
+    setTelefono(cliente.telefono ?? "");
+    setEmail(cliente.email);
+  };
+
+  const limpiarDatosCliente = () => {
+    setPerfilId("");
+    setNombre("");
+    setApellidos("");
+    setTelefono("");
+    setEmail("");
+  };
+
+  const cambiarModoCliente = (modo: ModoCliente) => {
+    setModoCliente(modo);
+    limpiarDatosCliente();
+    setBusquedaCliente("");
+  };
 
   const agregarItem = () => {
     const producto = productos?.find((p) => String(p.id) === productoSeleccionado);
@@ -98,6 +154,10 @@ const AdminPedidoManualForm = ({ onCreado }: { onCreado: () => void }) => {
       toast.error("Agregá al menos un producto");
       return;
     }
+    if (modoCliente === "existente" && !perfilId) {
+      toast.error("Elegí un cliente existente");
+      return;
+    }
     if (!nombre || !apellidos || !telefono || !email) {
       toast.error("Completá los datos de contacto del cliente");
       return;
@@ -120,6 +180,7 @@ const AdminPedidoManualForm = ({ onCreado }: { onCreado: () => void }) => {
         },
         body: JSON.stringify({
           items: items.map((i) => ({ productoId: i.productoId, cantidad: i.cantidad })),
+          perfilId: modoCliente === "existente" ? perfilId : null,
           nombre,
           apellidos,
           telefono,
@@ -207,26 +268,114 @@ const AdminPedidoManualForm = ({ onCreado }: { onCreado: () => void }) => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label>Nombre</Label>
-          <Input value={nombre} onChange={(e) => setNombre(e.target.value)} />
-        </div>
-        <div>
-          <Label>Apellidos</Label>
-          <Input value={apellidos} onChange={(e) => setApellidos(e.target.value)} />
+      <div className="space-y-3">
+        <Label>Cliente</Label>
+        <div className="flex flex-wrap gap-4">
+          <label className="flex items-center gap-2 text-sm font-sans">
+            <input
+              type="radio"
+              checked={modoCliente === "existente"}
+              onChange={() => cambiarModoCliente("existente")}
+            />
+            Cliente existente
+          </label>
+          <label className="flex items-center gap-2 text-sm font-sans">
+            <input
+              type="radio"
+              checked={modoCliente === "nuevo"}
+              onChange={() => cambiarModoCliente("nuevo")}
+            />
+            Completar datos manualmente
+          </label>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <Label>Teléfono</Label>
-          <Input value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+
+      {modoCliente === "existente" ? (
+        <div className="space-y-3 rounded-xl border border-border bg-background/60 p-4">
+          <div>
+            <Label>Buscar cliente</Label>
+            <Input
+              value={busquedaCliente}
+              onChange={(e) => setBusquedaCliente(e.target.value)}
+              placeholder="Nombre, apellido, email o teléfono..."
+              className="mt-2"
+            />
+          </div>
+
+          {cargandoClientes ? (
+            <p className="text-sm text-muted-foreground font-sans">Cargando clientes...</p>
+          ) : clientesFiltrados.length === 0 ? (
+            <p className="text-sm text-muted-foreground font-sans">No se encontraron clientes.</p>
+          ) : (
+            <div className="max-h-48 overflow-y-auto space-y-1 rounded-lg border border-border">
+              {clientesFiltrados.map((cliente) => {
+                const activo = cliente.id === perfilId;
+                return (
+                  <button
+                    key={cliente.id}
+                    type="button"
+                    onClick={() => aplicarCliente(cliente)}
+                    className={`w-full text-left px-3 py-2.5 text-sm font-sans transition-colors ${
+                      activo
+                        ? "bg-secondary text-foreground"
+                        : "hover:bg-muted/60 text-foreground"
+                    }`}
+                  >
+                    <span className="font-medium">
+                      {cliente.nombre} {cliente.apellidos}
+                    </span>
+                    <span className="block text-xs text-muted-foreground mt-0.5">
+                      {cliente.email}
+                      {cliente.telefono ? ` · ${cliente.telefono}` : ""}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {clienteSeleccionado && (
+            <p className="text-xs text-muted-foreground font-sans">
+              El pedido quedará vinculado a esta cuenta y va a verse en Mi cuenta.
+            </p>
+          )}
         </div>
-        <div>
-          <Label>Email</Label>
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      ) : (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label>Nombre</Label>
+              <Input value={nombre} onChange={(e) => setNombre(e.target.value)} />
+            </div>
+            <div>
+              <Label>Apellidos</Label>
+              <Input value={apellidos} onChange={(e) => setApellidos(e.target.value)} />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label>Teléfono</Label>
+              <Input value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {modoCliente === "existente" && clienteSeleccionado && (
+        <div className="rounded-xl border border-border bg-muted/30 px-4 py-3 text-sm font-sans">
+          <p className="font-medium text-foreground">
+            {clienteSeleccionado.nombre} {clienteSeleccionado.apellidos}
+          </p>
+          <p className="text-muted-foreground text-xs mt-1">
+            {clienteSeleccionado.email}
+            {clienteSeleccionado.telefono ? ` · ${clienteSeleccionado.telefono}` : ""}
+          </p>
+        </div>
+      )}
 
       <div>
         <Label>Método de entrega</Label>

@@ -1,7 +1,7 @@
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ProductGrid from "@/components/ProductGrid";
-import OrderBanner from "@/components/OrderBanner";
+import InfoPractica from "@/components/InfoPractica";
 import AboutSection from "@/components/AboutSection";
 import ClientStories from "@/components/ClientStories";
 import Footer from "@/components/Footer";
@@ -14,7 +14,7 @@ const Index = () => {
       <main className="pt-16">
         <HeroSection />
         <ProductGrid />
-        <OrderBanner />
+        <InfoPractica />
         <AboutSection />
         <ClientStories />
       </main>

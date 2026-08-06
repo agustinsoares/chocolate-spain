@@ -26,7 +26,7 @@ function fechaMinima(): string {
 
 const Checkout = () => {
     const { items, totalPrecio, clearCart } = useCart();
-    const { session } = useAuth();
+    const { session, perfil } = useAuth();
 
     const [loading, setLoading] = useState(false);
     const [metodoEntrega, setMetodoEntrega] = useState<"retiro" | "domicilio">("retiro");
@@ -37,8 +37,7 @@ const Checkout = () => {
     const [fechaEntrega, setFechaEntrega] = useState(fechaMinima());
     const [notas, setNotas] = useState("");
 
-    // Solo hacen falta si no hay sesión — si estás logueado, el backend
-    // saca estos datos de tu perfil.
+    // Solo hacen falta si no hay sesión — si estás logueado, usamos el perfil.
     const [nombre, setNombre] = useState("");
     const [apellidos, setApellidos] = useState("");
     const [telefono, setTelefono] = useState("");
@@ -63,7 +62,17 @@ const Checkout = () => {
             return false;
         }
 
-        if (!session && (!nombre || !apellidos || !telefono || !email)) {
+        if (session) {
+            if (!perfil?.nombre || !perfil?.apellidos || !perfil?.email) {
+                toast.error("Tu perfil está incompleto", {
+                    description: "Actualizá tus datos en Mi cuenta antes de pedir.",
+                });
+                return false;
+            }
+            return true;
+        }
+
+        if (!nombre || !apellidos || !telefono || !email) {
             toast.error("Completá tus datos de contacto");
             return false;
         }
@@ -86,9 +95,19 @@ const Checkout = () => {
                 ? `Envío a domicilio: ${direccion}, ${poblacion}, ${provincia} (CP ${codigoPostal})`
                 : "Retiro en el local";
 
-        const lineasContacto = session
-            ? ""
-            : `\nNombre: ${nombre} ${apellidos}\nTeléfono: ${telefono}\nEmail: ${email}`;
+        const contactoNombre = session
+            ? `${perfil?.nombre ?? ""} ${perfil?.apellidos ?? ""}`.trim()
+            : `${nombre} ${apellidos}`.trim();
+        const contactoTelefono = session ? perfil?.telefono ?? "" : telefono;
+        const contactoEmail = session ? perfil?.email ?? "" : email;
+
+        const lineasContacto = [
+            `Nombre: ${contactoNombre}`,
+            contactoTelefono ? `Teléfono: ${contactoTelefono}` : "",
+            `Email: ${contactoEmail}`,
+        ]
+            .filter(Boolean)
+            .join("\n");
 
         const mensaje = [
             "Hola! Quiero hacer este pedido:",
@@ -100,6 +119,7 @@ const Checkout = () => {
             lineasEntrega,
             `Fecha de entrega deseada: ${formatFecha(fechaEntrega)}`,
             notas ? `Notas: ${notas}` : "",
+            "",
             lineasContacto,
         ]
             .filter(Boolean)
@@ -139,10 +159,10 @@ const Checkout = () => {
                     codigoPostalEntrega: codigoPostal,
                     fechaEntrega,
                     notas,
-                    nombre,
-                    apellidos,
-                    telefono,
-                    email,
+                    nombre: session ? perfil?.nombre : nombre,
+                    apellidos: session ? perfil?.apellidos : apellidos,
+                    telefono: session ? perfil?.telefono : telefono,
+                    email: session ? perfil?.email : email,
                 }),
             });
 
@@ -188,7 +208,34 @@ const Checkout = () => {
                 </div>
 
                 <form onSubmit={handleWhatsAppOrder} className="space-y-5">
-                    {!session && (
+                    {session ? (
+                        <div className="rounded-xl border border-border bg-card/70 p-4 space-y-3">
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-sans mb-1">
+                                        Pedís como
+                                    </p>
+                                    <p className="font-sans font-medium text-foreground">
+                                        {perfil
+                                            ? `${perfil.nombre} ${perfil.apellidos}`
+                                            : "Cargando tus datos..."}
+                                    </p>
+                                </div>
+                                <Link
+                                    to="/mi-cuenta"
+                                    className="text-xs font-sans text-primary hover:text-accent font-medium shrink-0"
+                                >
+                                    Editar en Mi cuenta
+                                </Link>
+                            </div>
+                            {perfil && (
+                                <div className="text-sm font-sans text-muted-foreground space-y-1">
+                                    {perfil.telefono && <p>{perfil.telefono}</p>}
+                                    <p className="break-all">{perfil.email}</p>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
                         <div className="space-y-4 pb-2">
                             <p className="text-xs text-muted-foreground font-sans">
                                 Podés pedir sin crear cuenta. Si preferís,{" "}

@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion } from "framer-motion";
-import { Mail, Phone, ShieldCheck, Sparkles, UserRound } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  CalendarDays,
+  ChevronDown,
+  MapPin,
+  Mail,
+  Package,
+  Phone,
+  ShieldCheck,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "sonner";
@@ -18,6 +29,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Database } from "@/types/database";
 
 const perfilSchema = z.object({
   nombre: z.string().trim().min(1, "Ingresá tu nombre"),
@@ -26,10 +38,65 @@ const perfilSchema = z.object({
 });
 
 type PerfilForm = z.infer<typeof perfilSchema>;
+type PedidoRow = Database["public"]["Tables"]["pedidos"]["Row"];
+
+type PedidoItem = {
+  id: number;
+  pedido_id: number;
+  producto_nombre: string;
+  cantidad: number;
+  precio_unitario: number;
+  notas: string | null;
+};
+
+type PedidoCliente = PedidoRow & {
+  estado_pedido: string;
+  estado_pago: string;
+  items: PedidoItem[];
+};
+
+const formatPrecio = (valor: number) =>
+  new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" }).format(valor);
+
+const formatFecha = (valor: string) => {
+  const fecha = new Date(valor.includes("T") ? valor : `${valor}T12:00:00`);
+  if (Number.isNaN(fecha.getTime())) return valor;
+  return new Intl.DateTimeFormat("es-ES", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(fecha);
+};
+
+const formatFechaHora = (valor: string) => {
+  const fecha = new Date(valor);
+  if (Number.isNaN(fecha.getTime())) return valor;
+  return new Intl.DateTimeFormat("es-ES", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(fecha);
+};
 
 const MiCuenta = () => {
   const { perfil, session, refreshPerfil } = useAuth();
   const [guardando, setGuardando] = useState(false);
+  const [pedidoAbierto, setPedidoAbierto] = useState<number | null>(null);
+
+  const { data: pedidos = [], isLoading: cargandoPedidos } = useQuery({
+    queryKey: ["mis-pedidos", session?.user.id],
+    enabled: Boolean(session?.access_token),
+    queryFn: async (): Promise<PedidoCliente[]> => {
+      const res = await fetch("/api/mis-pedidos", {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "No se pudieron cargar los pedidos");
+      return data.pedidos ?? [];
+    },
+  });
 
   const form = useForm<PerfilForm>({
     resolver: zodResolver(perfilSchema),
@@ -235,6 +302,189 @@ const MiCuenta = () => {
               </Form>
             </motion.section>
           </div>
+
+          <motion.section
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.28 }}
+            className="mt-8 rounded-2xl border border-border/70 bg-card/70 backdrop-blur-sm p-6 md:p-8 shadow-sm"
+          >
+            <div className="mb-7 flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Package className="h-5 w-5 text-accent" />
+                  <h2 className="text-2xl font-serif">Mis pedidos</h2>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Historial de tus pedidos con productos, totales y estados.
+                </p>
+              </div>
+              {!cargandoPedidos && pedidos.length > 0 && (
+                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground shrink-0 pt-1">
+                  {pedidos.length} {pedidos.length === 1 ? "pedido" : "pedidos"}
+                </span>
+              )}
+            </div>
+
+            {cargandoPedidos ? (
+              <div className="flex items-center gap-3 text-sm text-muted-foreground font-sans py-8 justify-center">
+                <div className="h-5 w-5 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                Cargando pedidos...
+              </div>
+            ) : pedidos.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border bg-background/50 px-6 py-10 text-center">
+                <Package className="h-8 w-8 text-muted-foreground/50 mx-auto mb-3" />
+                <p className="font-serif text-lg text-foreground">Todavía no tenés pedidos</p>
+                <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+                  Cuando completes un pedido desde la web, va a aparecer acá con todo el detalle.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {pedidos.map((pedido, index) => {
+                  const abierto = pedidoAbierto === pedido.id;
+                  return (
+                    <motion.div
+                      key={pedido.id}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.35, delay: Math.min(index * 0.05, 0.3) }}
+                      className="rounded-xl border border-border bg-background/60 overflow-hidden"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setPedidoAbierto(abierto ? null : pedido.id)}
+                        className="w-full flex flex-wrap items-center justify-between gap-4 p-4 md:p-5 text-left hover:bg-muted/40 transition-colors"
+                      >
+                        <div>
+                          <p className="font-medium font-sans text-foreground">
+                            Pedido #{pedido.id}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                            <CalendarDays className="h-3.5 w-3.5" />
+                            Realizado el {formatFechaHora(pedido.creado_en)}
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 md:gap-3 font-sans text-sm">
+                          <span className="font-medium">{formatPrecio(pedido.total)}</span>
+                          <span className="text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
+                            {pedido.estado_pago}
+                          </span>
+                          <span className="text-xs px-2.5 py-1 rounded-full bg-secondary text-foreground">
+                            {pedido.estado_pedido}
+                          </span>
+                          <motion.span
+                            animate={{ rotate: abierto ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="text-muted-foreground"
+                          >
+                            <ChevronDown className="h-4 w-4" />
+                          </motion.span>
+                        </div>
+                      </button>
+
+                      <AnimatePresence initial={false}>
+                        {abierto && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.25, ease: "easeInOut" }}
+                            className="overflow-hidden"
+                          >
+                            <div className="border-t border-border p-4 md:p-5 font-sans text-sm space-y-5">
+                              <div className="grid sm:grid-cols-2 gap-4">
+                                <div>
+                                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-1.5">
+                                    Entrega
+                                  </p>
+                                  <p className="capitalize">
+                                    {pedido.metodo_entrega === "domicilio" ? "A domicilio" : "Retiro"}
+                                  </p>
+                                  <p className="text-muted-foreground mt-1">
+                                    Fecha: {formatFecha(pedido.fecha_entrega)}
+                                  </p>
+                                </div>
+
+                                {pedido.metodo_entrega === "domicilio" && (
+                                  <div>
+                                    <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-1.5 flex items-center gap-1.5">
+                                      <MapPin className="h-3.5 w-3.5" />
+                                      Dirección
+                                    </p>
+                                    <p>
+                                      {[
+                                        pedido.direccion_entrega,
+                                        pedido.poblacion_entrega,
+                                        pedido.provincia_entrega,
+                                      ]
+                                        .filter(Boolean)
+                                        .join(", ")}
+                                      {pedido.codigo_postal_entrega
+                                        ? ` (${pedido.codigo_postal_entrega})`
+                                        : ""}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+
+                              {pedido.notas && (
+                                <div>
+                                  <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-1.5">
+                                    Notas
+                                  </p>
+                                  <p className="text-foreground/90">{pedido.notas}</p>
+                                </div>
+                              )}
+
+                              <div>
+                                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
+                                  Productos
+                                </p>
+                                <div className="space-y-2">
+                                  {pedido.items.length === 0 ? (
+                                    <p className="text-muted-foreground">Sin detalle disponible.</p>
+                                  ) : (
+                                    pedido.items.map((item) => (
+                                      <div
+                                        key={item.id}
+                                        className="flex justify-between gap-4 rounded-lg bg-muted/40 px-3 py-2.5"
+                                      >
+                                        <div>
+                                          <p className="text-foreground">
+                                            {item.cantidad}× {item.producto_nombre}
+                                          </p>
+                                          <p className="text-xs text-muted-foreground mt-0.5">
+                                            {formatPrecio(item.precio_unitario)} c/u
+                                            {item.notas ? ` · ${item.notas}` : ""}
+                                          </p>
+                                        </div>
+                                        <span className="shrink-0 font-medium">
+                                          {formatPrecio(item.precio_unitario * item.cantidad)}
+                                        </span>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="flex justify-between items-center pt-2 border-t border-border">
+                                <span className="text-muted-foreground">Total</span>
+                                <span className="text-lg font-serif font-medium">
+                                  {formatPrecio(pedido.total)}
+                                </span>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )}
+          </motion.section>
         </div>
       </main>
 

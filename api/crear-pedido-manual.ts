@@ -11,6 +11,8 @@ interface ItemInput {
 
 interface CrearPedidoManualBody {
   items: ItemInput[];
+  /** Si viene, el pedido queda vinculado a ese perfil (aparece en Mi cuenta). */
+  perfilId?: string | null;
   nombre: string;
   apellidos: string;
   telefono: string;
@@ -83,6 +85,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  let perfilId: string | null = body.perfilId ?? null;
+
+  if (perfilId) {
+    const { data: perfilCliente, error: perfilError } = await supabaseAdmin
+      .from("perfiles")
+      .select("id")
+      .eq("id", perfilId)
+      .single();
+
+    if (perfilError || !perfilCliente) {
+      res.status(400).json({ error: "El cliente seleccionado no existe" });
+      return;
+    }
+  }
+
   // Precios reales desde la base — a propósito NO validamos ni tocamos
   // cupo_disponible acá: son ventas ya resueltas por fuera (Instagram,
   // WhatsApp), no deben verse afectadas por el cupo online.
@@ -135,7 +152,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const { data: pedido, error: pedidoError } = await supabaseAdmin
     .from("pedidos")
     .insert({
-      perfil_id: null,
+      perfil_id: perfilId,
       cliente_nombre: body.nombre,
       cliente_apellidos: body.apellidos,
       cliente_telefono: body.telefono,

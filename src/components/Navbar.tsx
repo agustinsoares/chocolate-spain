@@ -39,6 +39,9 @@ const Navbar = () => {
           <Link to="/#products" className="text-sm font-sans text-muted-foreground hover:text-foreground transition-colors">
             Productos
           </Link>
+          <Link to="/#info" className="text-sm font-sans text-muted-foreground hover:text-foreground transition-colors">
+            Cómo pedir
+          </Link>
           <Link to="/#about" className="text-sm font-sans text-muted-foreground hover:text-foreground transition-colors">
             Nosotros
           </Link>
@@ -141,6 +144,9 @@ const Navbar = () => {
             <div className="px-6 py-4 flex flex-col gap-4">
               <Link to="/#products" onClick={() => setOpen(false)} className="text-sm font-sans text-muted-foreground">
                 Productos
+              </Link>
+              <Link to="/#info" onClick={() => setOpen(false)} className="text-sm font-sans text-muted-foreground">
+                Cómo pedir
               </Link>
               <Link to="/#about" onClick={() => setOpen(false)} className="text-sm font-sans text-muted-foreground">
                 Nosotros
