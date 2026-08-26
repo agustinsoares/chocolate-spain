@@ -1,52 +1,22 @@
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/lib/supabaseClient";
+import type { Database } from "@/types/database";
 
-interface ClientStory {
-  name: string;
-  photo?: string;
-  text: string;
-  rating: number;
-}
+type Historia = Database["public"]["Tables"]["historias_clientes"]["Row"];
 
-const clientStories: ClientStory[] = [
-  {
-    name: "María González",
-    photo: "",
-    text: "Las tartas de Chocolate son una delicia, se nota el cariño en cada detalle. El dulce de leche sabe exactamente como el de casa.",
-    rating: 5,
-  },
-  {
-    name: "Julián Pérez",
-    photo: "",
-    text: "Pedí brownies para un cumpleaños y todos quedaron encantados. Repetiré seguro, la calidad es excelente.",
-    rating: 5,
-  },
-  {
-    name: "Carla Fernández",
-    photo: "",
-    text: "Encontrar sabores argentinos aquí en Valencia fue una gran sorpresa. El rogel es espectacular.",
-    rating: 4,
-  },
-  {
-    name: "Sofía Martínez",
-    photo: "",
-    text: "La torta Marquise es un pecado, húmeda y con la cantidad justa de dulce de leche. Llegó impecable a domicilio.",
-    rating: 4.5,
-  },
-  {
-    name: "Diego Herrera",
-    photo: "",
-    text: "El apple crumble tiene el punto exacto entre la manzana con canela y el crumble crocante. Ya es un clásico en casa.",
-    rating: 5,
-  },
-  {
-    name: "Lucía Romero",
-    photo: "",
-    text: "Pedí Havanette para agasajar a mi familia y no quedó ni un pedazo. Se nota que está hecho con dedicación.",
-    rating: 4,
-  },
-];
+const fetchHistorias = async (): Promise<Historia[]> => {
+  const { data, error } = await supabase
+    .from("historias_clientes")
+    .select("*")
+    .eq("activo", true)
+    .order("orden")
+    .order("id");
+  if (error) throw error;
+  return data ?? [];
+};
 
 const container = {
   hidden: {},
@@ -63,6 +33,7 @@ const item = {
 const getInitials = (name: string) =>
   name
     .split(" ")
+    .filter(Boolean)
     .map((part) => part[0])
     .join("")
     .slice(0, 2)
@@ -85,6 +56,15 @@ const StarRating = ({ rating }: { rating: number }) => (
 );
 
 const ClientStories = () => {
+  const {
+    data: historias,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["historias-clientes"],
+    queryFn: fetchHistorias,
+  });
+
   return (
     <section id="client-stories" className="py-20 bg-background">
       <div className="container mx-auto px-6">
@@ -97,39 +77,59 @@ const ClientStories = () => {
           </h2>
         </div>
 
-        <motion.div
-          variants={container}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-50px" }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {clientStories.map((story, index) => (
-            <motion.div
-              key={story.name}
-              variants={item}
-              className={`bg-card rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow duration-300 flex-col ${
-                index < 3 ? "flex" : "hidden sm:flex"
-              }`}
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <Avatar className="h-14 w-14">
-                  <AvatarImage src={story.photo} alt={story.name} />
-                  <AvatarFallback className="font-serif text-lg bg-secondary text-secondary-foreground">
-                    {getInitials(story.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-serif font-medium text-foreground">{story.name}</h3>
-                  <StarRating rating={story.rating} />
+        {isLoading && (
+          <p className="text-center text-muted-foreground font-sans">Cargando historias...</p>
+        )}
+
+        {isError && (
+          <p className="text-center text-muted-foreground font-sans">
+            No pudimos cargar las historias. Probá recargar la página.
+          </p>
+        )}
+
+        {historias && historias.length === 0 && (
+          <p className="text-center text-muted-foreground font-sans">
+            Todavía no hay historias cargadas.
+          </p>
+        )}
+
+        {historias && historias.length > 0 && (
+          <motion.div
+            variants={container}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-50px" }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+          >
+            {historias.map((story, index) => (
+              <motion.div
+                key={story.id}
+                variants={item}
+                className={`bg-card rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow duration-300 flex-col ${
+                  index < 3 ? "flex" : "hidden sm:flex"
+                }`}
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <Avatar className="h-14 w-14">
+                    {story.foto_url ? (
+                      <AvatarImage src={story.foto_url} alt={story.nombre} />
+                    ) : null}
+                    <AvatarFallback className="font-serif text-lg bg-secondary text-secondary-foreground">
+                      {getInitials(story.nombre)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-serif font-medium text-foreground">{story.nombre}</h3>
+                    <StarRating rating={Number(story.puntaje)} />
+                  </div>
                 </div>
-              </div>
-              <p className="text-sm text-muted-foreground font-sans leading-relaxed">
-                &ldquo;{story.text}&rdquo;
-              </p>
-            </motion.div>
-          ))}
-        </motion.div>
+                <p className="text-sm text-muted-foreground font-sans leading-relaxed">
+                  &ldquo;{story.descripcion}&rdquo;
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </div>
     </section>
   );

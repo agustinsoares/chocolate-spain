@@ -6,8 +6,9 @@ import AdminPedidos from "./admin/AdminPedidos";
 import AdminProductos from "./admin/AdminProductos";
 import AdminUsuarios from "./admin/AdminUsuarios";
 import AdminCatalogo from "./admin/AdminCatalogo";
+import AdminHistorias from "./admin/AdminHistorias";
 
-type Tab = "pedidos" | "productos" | "usuarios" | "catalogo";
+type Tab = "pedidos" | "productos" | "usuarios" | "catalogo" | "historias";
 
 const Admin = () => {
   const [tab, setTab] = useState<Tab>("pedidos");
@@ -19,6 +20,7 @@ const Admin = () => {
     { id: "productos", label: "Productos" },
     { id: "usuarios", label: "Usuarios" },
     { id: "catalogo", label: "Catálogo" },
+    { id: "historias", label: "Historias" },
   ];
 
   const handleSignOut = async () => {
@@ -63,6 +65,7 @@ const Admin = () => {
         {tab === "productos" && <AdminProductos />}
         {tab === "usuarios" && <AdminUsuarios />}
         {tab === "catalogo" && <AdminCatalogo />}
+        {tab === "historias" && <AdminHistorias />}
       </div>
     </section>
   );

@@ -216,6 +216,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      historias_clientes: {
+        Row: {
+          id: number;
+          nombre: string;
+          foto_url: string | null;
+          puntaje: number;
+          descripcion: string;
+          orden: number;
+          activo: boolean;
+          creado_en: string;
+          actualizado_en: string;
+        };
+        Insert: {
+          id?: number;
+          nombre: string;
+          foto_url?: string | null;
+          puntaje?: number;
+          descripcion: string;
+          orden?: number;
+          activo?: boolean;
+          creado_en?: string;
+          actualizado_en?: string;
+        };
+        Update: {
+          id?: number;
+          nombre?: string;
+          foto_url?: string | null;
+          puntaje?: number;
+          descripcion?: string;
+          orden?: number;
+          activo?: boolean;
+          creado_en?: string;
+          actualizado_en?: string;
+        };
+        Relationships: [];
+      };
       contacto: {
         Row: {
           id: number;
