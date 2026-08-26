@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -33,16 +34,13 @@ const RecuperarContrasena = () => {
   const onSubmit = async (values: FormValues) => {
     setLoading(true);
     try {
-      const res = await fetch("/api/recuperar-contrasena", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: values.email }),
+      const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
+        redirectTo: `${window.location.origin}/nueva-contrasena`,
       });
-      const data = await res.json();
 
-      if (!res.ok) {
+      if (error) {
         toast.error("No se pudo enviar el correo", {
-          description: data.error,
+          description: error.message,
         });
         return;
       }

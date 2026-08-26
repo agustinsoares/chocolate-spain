@@ -43,11 +43,13 @@ Build the app with `npm run build`; the output is in the `dist/` folder. Deploy 
 
 Copy `.env.example` to `.env.local` and fill in the values.
 
-Password recovery emails go through Resend (`RESEND_API_KEY`, `RESEND_FROM`) using a Supabase recovery link. Set `SITE_URL` to your public origin (e.g. `http://localhost:8080` or production URL).
+Password recovery emails are sent by Supabase Auth (`resetPasswordForEmail`). No Resend domain is required for this flow.
 
-In the Supabase Dashboard → Authentication → URL Configuration, add these Redirect URLs:
+In the Supabase Dashboard → Authentication → URL Configuration, set the Site URL and add Redirect URLs for every origin you use:
 
-- `{SITE_URL}/nueva-contrasena`
-- localhost equivalent while developing
+- `http://localhost:8080/nueva-contrasena`
+- `https://your-domain.com/nueva-contrasena`
 
-For production mail to any customer, verify a domain in Resend and set `RESEND_FROM` to an address on that domain.
+Supabase rejects any redirect that is not on that list. Check spam if the mail does not arrive; the default sender is a Supabase address.
+
+Order confirmation emails still go through Resend (`RESEND_API_KEY`, `RESEND_FROM`).
