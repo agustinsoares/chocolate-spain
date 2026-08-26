@@ -66,7 +66,7 @@ const ClientStories = () => {
   });
 
   return (
-    <section id="client-stories" className="py-20 bg-background">
+    <section id="client-stories" className="py-20 bg-secondary">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground mb-3 font-sans">

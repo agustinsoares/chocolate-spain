@@ -30,7 +30,7 @@ const puntos = [
 
 const InfoPractica = () => {
   return (
-    <section id="info" className="py-20 bg-background relative overflow-hidden">
+    <section id="info" className="py-20 bg-secondary relative overflow-hidden">
       <motion.div
         aria-hidden
         className="absolute top-10 -right-20 h-64 w-64 rounded-full bg-accent/10 blur-3xl"
