@@ -38,3 +38,16 @@ npm run dev
 ## Deployment
 
 Build the app with `npm run build`; the output is in the `dist/` folder. Deploy `dist/` to any static host (e.g. Vercel, Netlify, GitHub Pages, or your own server).
+
+## Auth / passwords
+
+Copy `.env.example` to `.env.local` and fill in the values.
+
+Password recovery emails go through Resend (`RESEND_API_KEY`, `RESEND_FROM`) using a Supabase recovery link. Set `SITE_URL` to your public origin (e.g. `http://localhost:8080` or production URL).
+
+In the Supabase Dashboard → Authentication → URL Configuration, add these Redirect URLs:
+
+- `{SITE_URL}/nueva-contrasena`
+- localhost equivalent while developing
+
+For production mail to any customer, verify a domain in Resend and set `RESEND_FROM` to an address on that domain.

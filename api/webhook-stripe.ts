@@ -17,6 +17,8 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY!;
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 const resendApiKey = process.env.RESEND_API_KEY!;
+const resendFrom =
+    process.env.RESEND_FROM ?? "Chocolate Spain <onboarding@resend.dev>";
 
 const stripe = new Stripe(stripeSecretKey);
 const resend = new Resend(resendApiKey);
@@ -71,7 +73,7 @@ async function marcarComoPagadoYAvisar(supabaseAdmin: any, pedidoId: number) {
 
     try {
         await resend.emails.send({
-            from: "Chocolate Spain <onboarding@resend.dev>",
+            from: resendFrom,
             to: pedido.cliente_email,
             subject: `¡Tu pedido #${pedido.id} fue confirmado!`,
             html: `
