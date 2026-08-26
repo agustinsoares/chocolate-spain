@@ -87,6 +87,15 @@ const Login = () => {
               )}
             />
 
+            <div className="text-right -mt-2">
+              <Link
+                to="/recuperar-contrasena"
+                className="text-xs font-sans text-muted-foreground hover:text-accent"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
+
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Ingresando..." : "Ingresar"}
             </Button>

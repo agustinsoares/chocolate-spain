@@ -16,6 +16,8 @@ import Checkout from "./pages/Checkout";
 import PedidoConfirmado from "./pages/PedidoConfirmado";
 import Admin from "./pages/Admin";
 import MiCuenta from "./pages/MiCuenta";
+import RecuperarContrasena from "./pages/RecuperarContrasena";
+import NuevaContrasena from "./pages/NuevaContrasena";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/registro" element={<Registro />} />
+              <Route path="/recuperar-contrasena" element={<RecuperarContrasena />} />
+              <Route path="/nueva-contrasena" element={<NuevaContrasena />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/pedido-confirmado" element={<PedidoConfirmado />} />
               <Route

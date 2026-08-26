@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   CalendarDays,
   ChevronDown,
+  Lock,
   MapPin,
   Mail,
   Package,
@@ -29,6 +30,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
 import type { Database } from "@/types/database";
 
 const perfilSchema = z.object({
@@ -37,7 +39,19 @@ const perfilSchema = z.object({
   telefono: z.string().trim().min(6, "Ingresá un teléfono válido"),
 });
 
+const passwordSchema = z
+  .object({
+    actual: z.string().min(1, "Ingresá tu contraseña actual"),
+    nueva: z.string().min(6, "Mínimo 6 caracteres"),
+    confirmar: z.string(),
+  })
+  .refine((data) => data.nueva === data.confirmar, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmar"],
+  });
+
 type PerfilForm = z.infer<typeof perfilSchema>;
+type PasswordForm = z.infer<typeof passwordSchema>;
 type PedidoRow = Database["public"]["Tables"]["pedidos"]["Row"];
 
 type PedidoItem = {
@@ -83,6 +97,7 @@ const formatFechaHora = (valor: string) => {
 const MiCuenta = () => {
   const { perfil, session, refreshPerfil } = useAuth();
   const [guardando, setGuardando] = useState(false);
+  const [guardandoPassword, setGuardandoPassword] = useState(false);
   const [pedidoAbierto, setPedidoAbierto] = useState<number | null>(null);
 
   const { data: pedidos = [], isLoading: cargandoPedidos } = useQuery({
@@ -101,6 +116,11 @@ const MiCuenta = () => {
   const form = useForm<PerfilForm>({
     resolver: zodResolver(perfilSchema),
     defaultValues: { nombre: "", apellidos: "", telefono: "" },
+  });
+
+  const passwordForm = useForm<PasswordForm>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: { actual: "", nueva: "", confirmar: "" },
   });
 
   useEffect(() => {
@@ -138,6 +158,41 @@ const MiCuenta = () => {
       toast.error("Error de conexión");
     } finally {
       setGuardando(false);
+    }
+  };
+
+  const onSubmitPassword = async (values: PasswordForm) => {
+    if (!perfil?.email) {
+      toast.error("No se pudo verificar tu cuenta");
+      return;
+    }
+
+    setGuardandoPassword(true);
+    try {
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: perfil.email,
+        password: values.actual,
+      });
+
+      if (verifyError) {
+        toast.error("La contraseña actual no es correcta");
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({ password: values.nueva });
+      if (error) {
+        toast.error("No se pudo cambiar la contraseña", {
+          description: error.message,
+        });
+        return;
+      }
+
+      passwordForm.reset();
+      toast.success("Contraseña actualizada");
+    } catch {
+      toast.error("Error de conexión");
+    } finally {
+      setGuardandoPassword(false);
     }
   };
 
@@ -210,6 +265,7 @@ const MiCuenta = () => {
               </div>
             </motion.aside>
 
+            <div className="space-y-6">
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -301,6 +357,76 @@ const MiCuenta = () => {
                 </form>
               </Form>
             </motion.section>
+
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.24 }}
+              className="rounded-2xl border border-border/70 bg-card/70 backdrop-blur-sm p-6 md:p-8 shadow-sm"
+            >
+              <div className="mb-7">
+                <div className="flex items-center gap-2 mb-2">
+                  <Lock className="h-5 w-5 text-accent" />
+                  <h2 className="text-2xl font-serif">Seguridad</h2>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Cambiá tu contraseña. Vas a necesitar la actual para confirmar.
+                </p>
+              </div>
+
+              <Form {...passwordForm}>
+                <form
+                  onSubmit={passwordForm.handleSubmit(onSubmitPassword)}
+                  className="space-y-5"
+                >
+                  <FormField
+                    control={passwordForm.control}
+                    name="actual"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contraseña actual</FormLabel>
+                        <FormControl>
+                          <Input type="password" className="bg-background/70" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={passwordForm.control}
+                    name="nueva"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nueva contraseña</FormLabel>
+                        <FormControl>
+                          <Input type="password" className="bg-background/70" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={passwordForm.control}
+                    name="confirmar"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirmar nueva contraseña</FormLabel>
+                        <FormControl>
+                          <Input type="password" className="bg-background/70" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="pt-1 flex justify-end">
+                    <Button type="submit" disabled={guardandoPassword}>
+                      {guardandoPassword ? "Actualizando..." : "Cambiar contraseña"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </motion.section>
+            </div>
           </div>
 
           <motion.section
