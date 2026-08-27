@@ -12,7 +12,10 @@ const VolverAlInicio = ({ className }: VolverAlInicioProps) => (
     asChild
     variant="ghost"
     size="sm"
-    className={cn("-ml-3 text-muted-foreground hover:text-accent font-sans", className)}
+    className={cn(
+      "-ml-3 text-muted-foreground hover:bg-transparent hover:text-accent font-sans",
+      className
+    )}
   >
     <Link to="/" aria-label="Volver al inicio">
       <ArrowLeft />
